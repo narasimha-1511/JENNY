@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
   const router = useRouter();
   const supabase = createClientComponentClient();
 
@@ -41,19 +42,47 @@ export default function LoginPage() {
     }
   };
 
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      if (data?.user) {
+        router.push('/dashboard');
+      }
+    } catch (error: any) {
+      console.error('Error registering:', error);
+      setError(error.message || 'An error occurred during registration');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Welcome back</h2>
-          <p className="mt-2 text-sm text-gray-600">Please sign in to your account</p>
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+            {isRegistering ? 'Create an account' : 'Welcome back'}
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            {isRegistering ? 'Sign up for a new account' : 'Please sign in to your account'}
+          </p>
         </div>
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
             <span className="block sm:inline">{error}</span>
           </div>
         )}
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+        <form className="mt-8 space-y-6" onSubmit={isRegistering ? handleRegister : handleLogin}>
           <div className="space-y-4">
             <div>
               <Label htmlFor="email">Email address</Label>
@@ -93,13 +122,21 @@ export default function LoginPage() {
             {loading ? (
               <>
                 <Icon name="loader2" className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
+                {isRegistering ? 'Signing up...' : 'Signing in...'}
               </>
             ) : (
-              'Sign in'
+              isRegistering ? 'Sign up' : 'Sign in'
             )}
           </Button>
         </form>
+        <div className="text-center mt-4">
+          <Button
+            variant="link"
+            onClick={() => setIsRegistering(!isRegistering)}
+          >
+            {isRegistering ? 'Already have an account? Sign in' : 'Don’t have an account? Sign up'}
+          </Button>
+        </div>
       </div>
     </div>
   );
