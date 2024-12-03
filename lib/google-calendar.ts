@@ -48,6 +48,7 @@ export function getAuthUrl() {
       'profile',
     ],
     prompt: 'consent',
+    redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/callback`
   });
 }
 

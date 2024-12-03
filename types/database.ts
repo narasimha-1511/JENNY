@@ -1,6 +1,7 @@
 export interface Bot {
   id: string;
   created_at: string;
+  name: string;
   phone_number: string;
   voice: string;
   system_prompt: string;

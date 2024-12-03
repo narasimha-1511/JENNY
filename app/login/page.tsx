@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
   const router = useRouter();
   const supabase = createClientComponentClient();
@@ -46,6 +47,9 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMessage(null);
+
+    console.log('Attempting to register with:', email);
 
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -53,10 +57,20 @@ export default function LoginPage() {
         password,
       });
 
-      if (error) throw error;
+      console.log('Registration response:', data, error);
+
+      if (error) {
+        console.error('Registration error:', error);
+        setError(error.message || 'An error occurred during registration');
+        return;
+      }
 
       if (data?.user) {
-        router.push('/dashboard');
+        console.log('Registration successful, redirecting to dashboard');
+        setSuccessMessage('We sent a confirmation email. Please check your inbox.');
+        setTimeout(() => router.push('/dashboard'), 2000);
+      } else if (data?.user?.confirmation_sent_at) {
+        setSuccessMessage('Confirmation email sent. Please check your inbox.');
       }
     } catch (error: any) {
       console.error('Error registering:', error);
@@ -80,6 +94,11 @@ export default function LoginPage() {
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
             <span className="block sm:inline">{error}</span>
+          </div>
+        )}
+        {successMessage && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded relative" role="alert">
+            <span className="block sm:inline">{successMessage}</span>
           </div>
         )}
         <form className="mt-8 space-y-6" onSubmit={isRegistering ? handleRegister : handleLogin}>
