@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { BotList } from './bot-list';
 import { CreateBotForm } from './create-bot-form';
+import { TwilioIntegration } from './twilio-integration';
 
 export function Sidebar({ onSelectBot }: { onSelectBot: (botId: string) => void }) {
   const [collapsed, setCollapsed] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showTwilioIntegration, setShowTwilioIntegration] = useState(false);
 
   return (
     <div
@@ -39,6 +41,14 @@ export function Sidebar({ onSelectBot }: { onSelectBot: (botId: string) => void 
             <Icon name="plus" className="h-4 w-4" />
             New Assistant
           </Button>
+          <Button
+            onClick={() => setShowTwilioIntegration(!showTwilioIntegration)}
+            className="w-full flex items-center gap-2 mt-4"
+          >
+            <Icon name="phone" className="h-4 w-4" />
+            Twilio Integration
+          </Button>
+          {showTwilioIntegration && <TwilioIntegration />}
         </div>
       )}
 

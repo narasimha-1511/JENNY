@@ -6,9 +6,15 @@ import { Icon } from "@/components/ui/icons";
 import { CreateBotForm } from "@/components/create-bot-form";
 import { AIAssistant } from "./ai-assistant/ai-assistant";
 import { CalendarView } from "./calendar/calendar-view";
+import { TwilioIntegration } from "./twilio-integration/twilio-integration";
 
 // Define the possible views/routes
-type ContentView = "dashboard" | "bots" | "calendar" | "settings";
+type ContentView =
+  | "dashboard"
+  | "bots"
+  | "calendar"
+  | "settings"
+  | "twilio-integration";
 
 interface MainContentProps {
   user: any;
@@ -62,6 +68,9 @@ export function MainContent({
             {/* Add your settings component here */}
           </div>
         );
+
+      case "twilio-integration":
+        return <TwilioIntegration />;
 
       default: // dashboard
         return (

@@ -1,4 +1,4 @@
-import { LucideProps } from 'lucide-react';
+import { CheckCircle, LucideProps } from 'lucide-react';
 import {
   Bot,
   Settings,
@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { memo } from 'react';
 
-const IconComponents: Record<string, LucideIcon> = {
+const IconComponents: Record<string, typeof LucideIcon> = {
   bot: Bot,
   settings: Settings,
   mail: Mail,
@@ -26,6 +26,7 @@ const IconComponents: Record<string, LucideIcon> = {
   chevronLeft: ChevronLeft,
   plus: Plus,
   x: X,
+  'tasks-checked': CheckCircle,
   'phone-call': PhoneCall,
   'play-circle': PlayCircle,
   'volume-up': Volume2,

@@ -9,28 +9,27 @@ interface DashboardLayoutProps {
   user: any;
 }
 
-enum ContentView {
-  Calendar = "calendar",
-  AiAssistant = "ai-assistant",
-
+export enum ContentView {
+  Calendar = "Calendar",
+  AiAssistant = "Ai-Assistant",
+  TwilioIntegration = "Twilio-Integration",
 }
 
 export function DashboardLayout({ user }: DashboardLayoutProps) {
-  const [showAiAssistant, setShowAiAssistant] = useState(false);
+  const [currentView, setCurrentView] = useState(ContentView.AiAssistant);
 
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar
-        showAiAssistant={showAiAssistant}
-        onAiAssistantClick={() => setShowAiAssistant(true)}
-        onCalendarClick={() => setShowAiAssistant(false)}
+        currentView={currentView}
+        setCurrentView={setCurrentView}
       />
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         <header className="bg-white shadow-sm border-b border-gray-200 flex-shrink-0">
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16 items-center">
               <h1 className="text-xl font-semibold text-gray-900">
-                {showAiAssistant ? "AI Assistant" : "Calendar"}
+                {currentView.toLocaleUpperCase().replace("-", " ")}
               </h1>
               <div className="flex items-center gap-2">
                 <Icon name="mail" className="h-5 w-5 text-gray-500" />
@@ -40,7 +39,7 @@ export function DashboardLayout({ user }: DashboardLayoutProps) {
           </div>
         </header>
         <div className="flex-1 overflow-auto">
-          <MainContent user={user} showAiAssistant={showAiAssistant} />
+          <MainContent user={user} currentView={currentView} />
         </div>
       </div>
     </div>

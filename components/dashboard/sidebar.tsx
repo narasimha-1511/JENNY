@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { ContentView } from "./layout";
 
 // Define the navigation item type
 interface NavItem {
@@ -20,15 +21,13 @@ interface NavItem {
 }
 
 interface SidebarProps {
-  showAiAssistant: boolean;
-  onAiAssistantClick: () => void;
-  onCalendarClick: () => void;
+  currentView: ContentView;
+  setCurrentView: (view: ContentView) => void;
 }
 
 export function Sidebar({
-  showAiAssistant,
-  onAiAssistantClick,
-  onCalendarClick,
+  currentView,
+  setCurrentView,
 }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const supabase = createClientComponentClient();
@@ -47,22 +46,28 @@ export function Sidebar({
     {
       name: "AI Assistant",
       icon: "bot",
-      active: showAiAssistant,
-      onClick: onAiAssistantClick,
+      active: currentView === ContentView.AiAssistant,
+      onClick: () => setCurrentView(ContentView.AiAssistant),
     },
     {
       name: "Calendar",
       icon: "calendar",
-      active: !showAiAssistant,
-      onClick: onCalendarClick,
+      active: currentView === ContentView.Calendar,
+      onClick: () => setCurrentView(ContentView.Calendar),
       badge: {
         count: 2,
         variant: "warning",
       },
     },
     {
+      name: "Twilio Integration",
+      icon: "phone-call",
+      active: currentView === ContentView.TwilioIntegration,
+      onClick: () => setCurrentView(ContentView.TwilioIntegration),
+    },
+    {
       name: "Tasks",
-      icon: "check",
+      icon: "tasks-checked",
       active: false,
       onClick: () => {},
       badge: {
