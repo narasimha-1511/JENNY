@@ -50,6 +50,16 @@ export function Sidebar({
       onClick: () => setCurrentView(ContentView.AiAssistant),
     },
     {
+      name: "Data Import",
+      icon: "fileSpreadsheet",
+      active: currentView === ContentView.DataImport,
+      onClick: () => setCurrentView(ContentView.DataImport),
+      badge: {
+        count: 1,
+        variant: "default",
+      },
+    },
+    {
       name: "Calendar",
       icon: "calendar",
       active: currentView === ContentView.Calendar,

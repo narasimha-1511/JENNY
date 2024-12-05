@@ -7,7 +7,8 @@ import { BotList } from "./bot-list";
 import { CreateBotForm } from "./create-bot-form";
 import { BotDetails } from "./bot-details";
 import { CalendarView } from "./calendar/calendar-view";
-import { TwilioIntegration } from "../sidebar/twilio-integration"; // Correct import path for TwilioIntegration
+import { TwilioIntegration } from "@/components/sidebar/twilio-integration"; 
+import { DataImport } from "./data-import";
 import { ContentView } from "./layout";
 
 
@@ -35,6 +36,10 @@ export function MainContent({ user, currentView }: MainContentProps) {
         <TwilioIntegration />
       </div>
     );
+  }
+
+  if (currentView === ContentView.DataImport) {
+    return <DataImport />;
   }
 
   return (

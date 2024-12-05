@@ -13,6 +13,7 @@ export enum ContentView {
   Calendar = "Calendar",
   AiAssistant = "Ai-Assistant",
   TwilioIntegration = "Twilio-Integration",
+  DataImport = "Data-Import"
 }
 
 export function DashboardLayout({ user }: DashboardLayoutProps) {

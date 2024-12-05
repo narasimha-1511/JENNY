@@ -1,4 +1,4 @@
-import { CheckCircle, LucideProps } from 'lucide-react';
+import { CheckCircle, FileSpreadsheet, LucideProps } from 'lucide-react';
 import {
   Bot,
   Settings,
@@ -31,6 +31,7 @@ const IconComponents: Record<string, typeof LucideIcon> = {
   'play-circle': PlayCircle,
   'volume-up': Volume2,
   'volume-mute': VolumeX,
+  'fileSpreadsheet': FileSpreadsheet,
   calendar: Calendar,
 };
 
