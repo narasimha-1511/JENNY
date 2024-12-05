@@ -204,10 +204,14 @@ export function VoiceClone() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
 
-      // Create a unique filename
       const timestamp = new Date().getTime();
-      const filename = `${timestamp}-${recordingName.replace(/\s+/g, '-')}.wav`;
+      const safeFileName = recordingName
+        .replace(/[^a-z0-9]/gi, '-')
+        .toLowerCase();
+      const filename = `${timestamp}-${safeFileName}.wav`;
       const storagePath = `${user.id}/${filename}`;
+
+      console.log('Uploading to storage path:', storagePath);
 
       // Upload to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -215,10 +219,12 @@ export function VoiceClone() {
         .upload(storagePath, audioBlob, {
           contentType: 'audio/wav',
           cacheControl: '3600',
-          upsert: false
+          upsert: true // Enable upsert to handle potential duplicates
         });
 
       if (uploadError) throw uploadError;
+
+      console.log('Upload successful:', uploadData);
 
       // Get the public URL
       const { data: { publicUrl }, error: urlError } = await supabase.storage
@@ -227,7 +233,7 @@ export function VoiceClone() {
 
       if (urlError) throw urlError;
 
-      // Insert record into database with processed status
+      // Store in database
       const { data: recordingData, error: dbError } = await supabase
         .from('voice_recordings')
         .insert({
@@ -237,8 +243,8 @@ export function VoiceClone() {
           recording_path: storagePath,
           file_size: audioBlob.size,
           mime_type: 'audio/wav',
-          status: 'processed', // Set to processed since we can play it
-          duration: 0 // We'll update this after loading the audio
+          status: 'processed',
+          duration: 0
         })
         .select()
         .single();
@@ -311,14 +317,59 @@ export function VoiceClone() {
   const handleDeleteRecording = async (recordingId: string) => {
     try {
       const recording = recordings.find(r => r.id === recordingId);
-      if (!recording) return;
+      if (!recording) {
+        console.error('Recording not found');
+        return;
+      }
 
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('voice-recordings')
-        .remove([recording.recording_path]);
+      console.log('Deleting recording:', recording);
 
-      if (storageError) throw storageError;
+      // First delete from storage
+      if (recording.recording_path) {
+        console.log('Attempting to delete from storage:', recording.recording_path);
+
+        try {
+          // First try to delete using RPC call
+          const { error: rpcError } = await supabase.rpc('delete_storage_object', {
+            bucket_name: 'voice-recordings',
+            file_path: recording.recording_path
+          });
+
+          console.log('RPC deletion result:', { error: rpcError });
+
+          if (rpcError) {
+            // Fallback to regular delete
+            const { error: deleteError } = await supabase.storage
+              .from('voice-recordings')
+              .remove([recording.recording_path]);
+
+            console.log('Regular deletion result:', { error: deleteError });
+          }
+
+          // Verify deletion
+          const { data: fileExists } = await supabase.storage
+            .from('voice-recordings')
+            .list(recording.recording_path.split('/')[0], {
+              limit: 1,
+              offset: 0,
+              sortBy: { column: 'name', order: 'asc' }
+            });
+
+          console.log('File exists check:', fileExists);
+
+          if (fileExists && fileExists.length > 0) {
+            console.log('File still exists, trying forced delete');
+            // Try one more time with force flag
+            await supabase.storage
+              .from('voice-recordings')
+              .remove([recording.recording_path], {
+                force: true
+              });
+          }
+        } catch (storageError) {
+          console.error('Storage deletion error:', storageError);
+        }
+      }
 
       // Delete from database
       const { error: dbError } = await supabase
@@ -326,14 +377,28 @@ export function VoiceClone() {
         .delete()
         .eq('id', recordingId);
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        throw dbError;
+      }
 
-      // Update UI
+      // Update local state
       setRecordings(prev => prev.filter(r => r.id !== recordingId));
+      
+      if (currentlyPlaying === recordingId) {
+        audioRef.current?.pause();
+        setCurrentlyPlaying(null);
+      }
+
+      setError(null);
     } catch (error) {
       console.error('Error deleting recording:', error);
       setError('Failed to delete recording');
     }
+  };
+
+  const getStoragePath = (fullPath: string) => {
+    // Remove any leading slashes
+    return fullPath.replace(/^\/+/, '');
   };
 
   const handleStartRecording = async () => {
@@ -411,6 +476,19 @@ export function VoiceClone() {
       setCurrentlyPlaying(null);
     }
   };
+
+  useEffect(() => {
+    const createStorageFunction = async () => {
+      try {
+        const { error } = await supabase.rpc('create_delete_storage_function');
+        if (error) console.error('Error creating storage function:', error);
+      } catch (error) {
+        console.error('Error setting up storage function:', error);
+      }
+    };
+
+    createStorageFunction();
+  }, []);
 
   return (
     <div className="p-6 space-y-6">
