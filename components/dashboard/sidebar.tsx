@@ -60,6 +60,12 @@ export function Sidebar({
       },
     },
     {
+      name: "Voice Clone",
+      icon: "mic",
+      active: currentView === ContentView.VoiceClone,
+      onClick: () => setCurrentView(ContentView.VoiceClone),
+    },
+    {
       name: "Calendar",
       icon: "calendar",
       active: currentView === ContentView.Calendar,

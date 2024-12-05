@@ -10,7 +10,7 @@ import { CalendarView } from "./calendar/calendar-view";
 import { TwilioIntegration } from "@/components/sidebar/twilio-integration"; 
 import { DataImport } from "./data-import";
 import { ContentView } from "./layout";
-
+import { VoiceClone } from "./voice-clone";
 
 interface MainContentProps {
   user: any;
@@ -40,6 +40,14 @@ export function MainContent({ user, currentView }: MainContentProps) {
 
   if (currentView === ContentView.DataImport) {
     return <DataImport />;
+  }
+
+  if (currentView === ContentView.VoiceClone) {
+    return (
+      <div className="flex-1 overflow-y-auto">
+        <VoiceClone />
+      </div>
+    );
   }
 
   return (

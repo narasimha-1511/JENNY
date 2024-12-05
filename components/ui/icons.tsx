@@ -1,4 +1,4 @@
-import { CheckCircle, FileSpreadsheet, LucideProps } from 'lucide-react';
+import { CheckCircle, FileSpreadsheet, LucideProps, Mic, Square, Upload, Play, Trash, PlayIcon, TrashIcon } from 'lucide-react';
 import {
   Bot,
   Settings,
@@ -32,7 +32,12 @@ const IconComponents: Record<string, typeof LucideIcon> = {
   'volume-up': Volume2,
   'volume-mute': VolumeX,
   'fileSpreadsheet': FileSpreadsheet,
+  'mic': Mic,
+  'upload':Upload,
+  'square': Square,
   calendar: Calendar,
+  'play': PlayIcon,
+  'trash': TrashIcon,
 };
 
 interface IconProps extends Omit<LucideProps, 'ref'> {
