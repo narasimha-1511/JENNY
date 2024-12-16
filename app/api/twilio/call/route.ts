@@ -21,7 +21,7 @@ async function createCall(
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
-          Twiml: `<Response><Connect><Stream url="${joinUrl}" /></Connect></Response>`,
+          Twiml: `<Response><Say>Hello, this is a test call.</Say><Connect><Stream url="${joinUrl}" /></Connect></Response>`,
           From: from,
           To: phoneNumber,
         }).toString(),
@@ -32,7 +32,10 @@ async function createCall(
       throw new Error(`Twilio API error: ${await twilioResponse.text()}`);
     }
 
-    return await twilioResponse.json();
+    const data = await twilioResponse.json();
+    console.log("Twilio API response:", data);
+
+    return data;
   } catch (error) {
     console.error("Failed to create twilio call:", error);
     throw error;
@@ -65,6 +68,8 @@ export async function POST(request: NextRequest) {
       to,
       fromNumber
     );
+
+    console.log("Twilio API response:", result);
 
     return NextResponse.json({
       success: true,

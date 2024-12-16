@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     const requestUrl = new URL(request.url);
     const code = requestUrl.searchParams.get('code');
-    let redirectPath = requestUrl.searchParams.get('redirect') || '/dashboard';
+    let redirectPath = requestUrl.searchParams.get('redirect') || '/dashboard/aiassistant';
 
     if (!code) {
       console.error('No code provided in callback');

@@ -409,7 +409,9 @@ export function CalendarView() {
     try {
       const response = await fetch("/api/calendar/auth-url");
       const { url } = await response.json();
-      window.location.href = url;
+      if (url && typeof window !== "undefined") {
+        window.location.href = url;
+      }
     } catch (error) {
       console.error("Error getting auth URL:", error);
       toast({

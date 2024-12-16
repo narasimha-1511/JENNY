@@ -28,6 +28,7 @@ export function Sidebar() {
       }
 
       // Force a hard redirect to login page
+      if(typeof window !== "undefined")
       window.location.href = '/login';
     } catch (error) {
       console.error('Error signing out:', error);

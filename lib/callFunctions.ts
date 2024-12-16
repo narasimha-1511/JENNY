@@ -67,35 +67,35 @@ export async function startCall(
       console.error("Join URL is required");
       return;
     } else {
-      // console.log("Joining call:", joinUrl);
+      console.log("Joining call:", joinUrl);
 
-      // Start up our Ultravox Session
-      ultravoxSession = new UltravoxSession({
-        experimentalMessages: debugMessages,
-      });
+    // Start up our Ultravox Session
+    ultravoxSession = new UltravoxSession({
+      experimentalMessages: debugMessages,
+    });
 
-      if (showDebugMessages) {
-        console.log("ultravoxSession created:", ultravoxSession);
+    if (showDebugMessages) {
+      console.log("ultravoxSession created:", ultravoxSession);
         console.log(
           "ultravoxSession methods:",
           Object.getOwnPropertyNames(Object.getPrototypeOf(ultravoxSession))
         );
-      }
+    }
 
       if (ultravoxSession) {
         ultravoxSession.addEventListener("status", (event: any) => {
-          callbacks.onStatusChange(ultravoxSession?.status);
-        });
+      callbacks.onStatusChange(ultravoxSession?.status);
+    });
 
         ultravoxSession.addEventListener("transcripts", (event: any) => {
-          callbacks.onTranscriptChange(ultravoxSession?.transcripts);
-        });
+      callbacks.onTranscriptChange(ultravoxSession?.transcripts);
+    });
 
-        ultravoxSession.addEventListener("experimental_message", (msg: any) => {
-          callbacks?.onDebugMessage?.(msg);
-        });
+    ultravoxSession.addEventListener("experimental_message", (msg: any) => {
+      callbacks?.onDebugMessage?.(msg);
+    });
 
-        ultravoxSession.joinCall(joinUrl);
+    ultravoxSession.joinCall(joinUrl);
         console.log("Session status:", ultravoxSession.status);
       } else {
         return;
@@ -144,7 +144,7 @@ export async function startTwilioCall(
     }
 
     if (!twilioConfig.to_number) {
-      console.error("twilio to number not provided");
+      console.error("Twilio to number not provided");
       return;
     }
 

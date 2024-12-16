@@ -14,11 +14,11 @@ export async function GET(request: NextRequest) {
   try {
     const requestUrl = new URL(request.url);
     const code = requestUrl.searchParams.get('code');
-    let redirectPath = requestUrl.searchParams.get('redirect') || '/dashboard';
+    let redirectPath = requestUrl.searchParams.get('redirect') || '/dashboard/aiassistant';
 
     if (!code) {
       console.error('No code provided in calendar callback');
-      return NextResponse.redirect(new URL('/dashboard?error=no_code', requestUrl.origin));
+      return NextResponse.redirect(new URL('/dashboard/aiassistant?error=no_code', requestUrl.origin));
     }
 
     // Get the current user from Supabase
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error in calendar callback:', error);
     return NextResponse.redirect(
-      new URL('/dashboard?error=calendar_setup_failed', request.url)
+      new URL('/dashboard/aiassistant?error=calendar_setup_failed', request.url)
     );
   }
 }

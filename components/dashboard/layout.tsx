@@ -7,31 +7,23 @@ import { Icon } from "@/components/ui/icons";
 
 interface DashboardLayoutProps {
   user: any;
+  router: any;
 }
 
-export enum ContentView {
-  Calendar = "Calendar",
-  AiAssistant = "Ai-Assistant",
-  TwilioIntegration = "Twilio-Integration",
-  DataImport = "Data-Import",
-  VoiceClone = "Voice-Clone"
-}
 
-export function DashboardLayout({ user }: DashboardLayoutProps) {
-  const [currentView, setCurrentView] = useState(ContentView.AiAssistant);
+
+export function DashboardLayout({ user, router }: DashboardLayoutProps) {
+  const [currentView, setCurrentView] = useState();
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-      />
+      <Sidebar  />
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         <header className="bg-white shadow-sm border-b border-gray-200 flex-shrink-0">
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16 items-center">
               <h1 className="text-xl font-semibold text-gray-900">
-                {currentView.toLocaleUpperCase().replace("-", " ")}
+                {/* {currentView.toLocaleUpperCase().replace("-", " ")} */}
               </h1>
               <div className="flex items-center gap-2">
                 <Icon name="mail" className="h-5 w-5 text-gray-500" />

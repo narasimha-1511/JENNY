@@ -1,3 +1,10 @@
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 export async function makeCall(
   accountSid: string,
   authToken: string,
@@ -6,6 +13,13 @@ export async function makeCall(
   joinUrl: string
 ) {
   try {
+    if (!accountSid || !authToken || !fromNumber || !to || !joinUrl) {
+      return {
+        success: false,
+        error: "Missing required parameters for Twilio call",
+      };
+    }
+
     const response = await fetch("/api/twilio/call", {
       method: "POST",
       headers: {
@@ -20,20 +34,24 @@ export async function makeCall(
       }),
     });
 
-    return { success: true, data: response };
+    return await response.json();
   } catch (error) {
-    console.log("error while call using twiio", error);
-    return { success: false, error: `Failed to make call: ${error}` };
+    console.error("Error while making Twilio call:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
   }
 }
 
 export async function getTwilioCredentials(userId: string) {
   try {
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    if (!userId) {
+      return {
+        success: false,
+        error: "User ID is required",
+      };
+    }
 
     const { data, error } = await supabase
       .from("twilio_credentials")
@@ -41,12 +59,19 @@ export async function getTwilioCredentials(userId: string) {
       .eq("user_id", userId)
       .single();
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
+
     return { success: true, data };
   } catch (error) {
+    console.error("Error fetching Twilio credentials:", error);
     return {
       success: false,
-      error: `Failed to get Twilio credentials: ${error}`,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to get Twilio credentials",
     };
   }
 }
