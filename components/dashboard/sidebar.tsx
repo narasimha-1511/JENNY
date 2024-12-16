@@ -4,9 +4,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
+import { supabase } from "@/lib/supabase-client";
 
 // Define the navigation item type
 interface NavItem {
@@ -21,21 +21,19 @@ interface NavItem {
   };
 }
 
-
 export function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
 
   const [collapsed, setCollapsed] = useState(false);
   const [currentView, setCurrentView] = useState<string>(pathname);
-  const supabase = createClientComponentClient();
 
   const handleSignOut = async () => {
     try {
       await fetch("/api/auth/signout", { method: "POST" });
       await supabase.auth.signOut();
-      if(typeof window !== "undefined")
-      window.location.href = "/login";
+      if (typeof window !== "undefined")
+        window.location.href = "/login";
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -47,28 +45,36 @@ export function Sidebar() {
       icon: "bot",
       path: "/dashboard/aiassistant",
       active: currentView === "/dashboard/aiassistant",
-      onClick: () => router.push("/dashboard/aiassistant"),
+      onClick: () => {
+        router.push("/dashboard/aiassistant");
+      },
     },
     {
       name: "Calendar",
       icon: "calendar",
       path: "/dashboard/calendar",
       active: currentView === "/dashboard/calendar",
-      onClick: () => router.push("/dashboard/calendar"),
+      onClick: () => {
+        router.push("/dashboard/calendar");
+      },
     },
     {
       name: "Twilio Integration",
       icon: "phone-call",
       path: "/dashboard/twilio",
       active: currentView === "/dashboard/twilio",
-      onClick: () => router.push("/dashboard/twilio"),
+      onClick: () => {
+        router.push("/dashboard/twilio");
+      },
     },
     {
       name: "Data Import",
       icon: "upload",
       path: "/dashboard/dataimport",
       active: currentView === "/dashboard/dataimport",
-      onClick: () => router.push("/dashboard/dataimport"),
+      onClick: () => {
+        router.push("/dashboard/dataimport");
+      },
       badge: {
         count: 1,
         variant: "default",
@@ -79,7 +85,10 @@ export function Sidebar() {
       icon: "mic",
       path: "/dashboard/voiceclone",
       active: currentView === "/dashboard/voiceclone",
-      onClick: () => router.push("/dashboard/voiceclone"),
+      onClick: () => {
+        router.prefetch("/dashboard/voiceclone");
+        router.push("/dashboard/voiceclone");
+      },
     },
     {
       name: "Tasks",

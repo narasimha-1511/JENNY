@@ -33,7 +33,7 @@ export default function LoginPage() {
 
       if (data?.session) {
         router.refresh();
-        router.push('/dashboard');
+        router.push('/dashboard/aiassistant');
       }
     } catch (error: any) {
       console.error('Error logging in:', error);

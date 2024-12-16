@@ -4,8 +4,13 @@ import { Icon } from '@/components/ui/icons';
 import { supabase } from '@/lib/supabase';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { DeleteIcon, Pencil, Trash } from 'lucide-react';
+import { useUser } from '@/hooks/use-user';
 
 export function TwilioIntegration() {
+
+  const { user, loading } = useUser();
+  console.log('User state:', { userId: user?.id, loading });
+
   const [twilioAccounts, setTwilioAccounts] = useState([
     { id: '', account_sid: '', auth_token: '', from_phone_number: '' }
   ]);
@@ -16,16 +21,42 @@ export function TwilioIntegration() {
   });
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [editMode, setEditMode] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchAccounts = async () => {
-    const { data, error } = await supabase.from('twilio_credentials').select('*');
-    if (error) console.error('Error fetching accounts:', error);
-    else setTwilioAccounts(data);
+    try {
+      setIsLoading(true);
+      if (!user?.id) {
+        console.log('No user ID available');
+        return;
+      }
+      
+      console.log('Fetching accounts for user:', user.id);
+      const { data, error } = await supabase
+        .from('twilio_credentials')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error fetching accounts:', error);
+        return;
+      }
+
+      console.log('Fetched accounts:', data);
+      setTwilioAccounts(data || []);
+    } catch (error) {
+      console.error('Unexpected error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchAccounts();
-  }, []);
+    // Only fetch accounts when user is loaded and exists
+    if (!loading && user?.id) {
+      fetchAccounts();
+    }
+  }, [user?.id, loading]); // Add user.id and loading as dependencies
 
   const addTwilioAccount = async () => {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
