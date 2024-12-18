@@ -162,3 +162,32 @@ export interface TwilioConfig {
   from_number: string;
   to_number: string | undefined;
 }
+
+export interface Bot {
+  id: string;
+  name: string;
+  phone_number?: string;
+  voice: string;
+  system_prompt: string;
+  created_at: string;
+  user_id: string;
+  allows_appointments: boolean;
+  availability?: {
+    days: string[];
+    hours: {
+      start: string;
+      end: string;
+    };
+  };
+}
+
+export interface Appointment {
+  id: string;
+  bot_id: string;
+  customer_name: string;
+  customer_phone: string;
+  date: string;
+  time: string;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  created_at: string;
+}

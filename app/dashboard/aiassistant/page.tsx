@@ -15,7 +15,7 @@ const page = () => {
   return (
     <div className="flex h-full">
       {/* Left Sidebar - Bot List */}
-      <div className="w-64 border-r border-gray-200 bg-white p-4">
+      <div className="w-64 border-r border-gray-200 bg-white p-4 overflow-y-auto">
         <Button
           onClick={() => setShowCreateForm(true)}
           className="w-full flex items-center gap-2 mb-4"

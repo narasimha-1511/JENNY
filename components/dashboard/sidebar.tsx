@@ -50,6 +50,15 @@ export function Sidebar() {
       },
     },
     {
+      name: 'Appointment Tools',
+      path: '/dashboard/appointment-tools',
+      icon: 'calendar',
+      active: currentView === '/dashboard/appointment-tools',
+      onClick: () => {
+        router.push('/dashboard/appointment-tools');
+      }
+    },
+    {
       name: "Calendar",
       icon: "calendar",
       path: "/dashboard/calendar",

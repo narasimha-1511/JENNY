@@ -24,6 +24,7 @@ import { CallStatus } from "@/components/ui/call-status";
 import { startCall, endCall, startTwilioCall } from "@/lib/callFunctions";
 import { Transcript, UltravoxSessionStatus } from "ultravox-client";
 import { CallConfig, TwilioConfig } from "@/lib/types";
+import { BotAppointmentConfig } from "./bot-appointment-config";
 
 const formSchema = z.object({
   name: z.string().min(1, "Bot name is required"),
@@ -268,7 +269,7 @@ export function BotDetails({ botId }: BotDetailsProps) {
       {/* Left Panel - Bot Configuration */}
       <div className="w-1/2 space-y-6">
         <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-lg font-semibold mb-4">Bot Configuration</h2>
+          {/* <h2 className="text-lg font-semibold mb-4">Bot Configuration</h2> */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <Label htmlFor="name">Bot Name</Label>
@@ -376,13 +377,18 @@ export function BotDetails({ botId }: BotDetailsProps) {
       {/* Right Panel - Actions & Transcripts */}
       <div className="w-1/2 space-y-6">
         {/* Transcripts Section */}
-        <div
+        {/* <div
           className="bg-white p-6 rounded-lg shadow-sm flex-1"
           ref={transcriptContainerRef}
         >
           <h2 className="text-lg font-semibold mb-4">Transcripts</h2>
           <TranscriptView botId={botId} initialTranscripts={callTranscript} />
-        </div>
+        </div> */}
+
+          
+          {/* Appointment Configuratio */}
+          <BotAppointmentConfig botId={botId} />
+        
 
         {/* Actions Section */}
         <div className="bg-white p-6 rounded-lg shadow-sm space-y-4 mt-auto">
