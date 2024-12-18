@@ -10,6 +10,7 @@ const layout = ({ children }: { children: React.ReactNode}) => {
   const { user , loading} = useUser()
 
   const getTitle = (pathname : string) => {
+
     switch (pathname) {
       case '/dashboard/aiassistant':
         return 'AI Assistants';
@@ -19,6 +20,10 @@ const layout = ({ children }: { children: React.ReactNode}) => {
         return 'Data Import';
       case '/dashboard/twilio':
         return 'Twilio Integration';
+      case '/dashboard/voiceclone':
+        return 'Voice Clone';
+      case '/dashboard/appointment-tools':
+        return 'Appointment Tools';
       default:
         return '';
     }
@@ -32,7 +37,7 @@ const layout = ({ children }: { children: React.ReactNode}) => {
             <header className="bg-white shadow-sm border-b border-gray-200 flex-shrink-0 flex items-center justify-between pr-8">
                 <div className="px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16 items-center">
-                        <h1 className="text-xl font-semibold text-gray-900">{getTitle(pathname)}</h1>
+                        <h1 className="text-xl font-semibold text-gray-900">{getTitle(pathname) }</h1>
                     </div>
                 </div>
                   <div className="flex items-center gap-2">

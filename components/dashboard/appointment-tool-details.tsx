@@ -162,7 +162,7 @@ export function AppointmentToolDetails({ toolId }: AppointmentToolDetailsProps) 
         </div>
 
         {/* Business Hours */}
-        <div className="bg-white p-6 rounded-lg shadow-sm">
+        {/* <div className="bg-white p-6 rounded-lg shadow-sm">
           <h2 className="text-xl font-semibold mb-4">Business Hours</h2>
           
           <div className="space-y-4">
@@ -226,7 +226,7 @@ export function AppointmentToolDetails({ toolId }: AppointmentToolDetailsProps) 
               );
             })}
           </div>
-        </div>
+        </div> */}
       </div>
       
       {/* Save Changes Button */}

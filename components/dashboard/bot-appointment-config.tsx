@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Toggle } from '../ui/toggle';
 
 interface BotAppointmentConfigProps {
   botId: string;
@@ -24,10 +25,23 @@ export function BotAppointmentConfig({ botId }: BotAppointmentConfigProps) {
   const [loading, setLoading] = useState(false);
   const [tools, setTools] = useState<AppointmentTool[]>([]);
   const [config, setConfig] = useState<BotAppointmentConfig | null>(null);
+  const [isAppointmentEnabled, setIsAppointmentEnabled] = useState(false);
   const { toast } = useToast();
+
 
   useEffect(() => {
     const fetchData = async () => {
+
+      const { data: botData } = await supabase
+        .from('bots')
+        .select('is_appointment_booking_allowed , appointment_tool_id')
+        .eq('id', botId)
+        .single();
+
+      setIsAppointmentEnabled(botData?.is_appointment_booking_allowed);
+      //@ts-ignore
+      setConfig((prevConfig) =>  ({ ...prevConfig, tool_id: botData?.appointment_tool_id }));
+
       // Fetch available appointment tools
       const { data: toolsData } = await supabase
         .from('appointment_tools')
@@ -55,6 +69,15 @@ export function BotAppointmentConfig({ botId }: BotAppointmentConfigProps) {
   const handleToolSelect = async (toolId: string) => {
     try {
       setLoading(true);
+
+      //@ts-ignore
+      setConfig((prevConfig) => ({ ...prevConfig, tool_id: toolId }));
+
+      const { data } = await supabase
+      .from('bots')
+      .update({  appointment_tool_id: toolId })
+      .eq('id', botId)
+      .single();
       
       if (config) {
         // Update existing config
@@ -120,10 +143,36 @@ export function BotAppointmentConfig({ botId }: BotAppointmentConfigProps) {
     }
   };
 
+  const handleAppointmentToggle = async (value: boolean) => {
+    try {
+
+      const { error } = await supabase
+        .from('bots')
+        .update({ is_appointment_booking_allowed: value })
+        .eq('id', botId);
+
+      if (error) throw error;
+
+      setIsAppointmentEnabled(value); 
+
+      toast({
+        title: "Success",
+        description: "Settings updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update settings",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm space-y-6">
       <div>
-        <h3 className="text-lg font-medium mb-4">Appointment Settings</h3>
+
+        <h3 className="text-lg font-medium mb-4">Appointment Settings <Switch className='ml-4 ' checked={isAppointmentEnabled} onCheckedChange={handleAppointmentToggle} /> </h3>
         
         <div className="space-y-4">
           <div>
@@ -131,10 +180,10 @@ export function BotAppointmentConfig({ botId }: BotAppointmentConfigProps) {
             <Select
               value={config?.tool_id}
               onValueChange={handleToolSelect}
-              disabled={loading}
+              disabled={loading || !isAppointmentEnabled}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Choose a tool" />
+                <SelectValue placeholder="Choose a tool"  />
               </SelectTrigger>
               <SelectContent>
                 {tools.map((tool) => (
@@ -146,7 +195,7 @@ export function BotAppointmentConfig({ botId }: BotAppointmentConfigProps) {
             </Select>
           </div>
 
-          {config && (
+          {false && config && (
             <>
               <div className="flex items-center justify-between">
                 <div>
