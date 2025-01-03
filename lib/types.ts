@@ -1,3 +1,20 @@
+
+export interface CalendarAccount {
+  id: string;
+  user_id: string;
+  access_token: string;
+  refresh_token: string;
+  calendar_email: string;
+  expires_at: string;
+}
+
+
+export interface Voice {
+  voiceId: string;
+  name: string;
+}
+
+
 // these are for Ultravox Espescially
 export interface JoinUrlResponse {
   callId: string;
@@ -128,6 +145,7 @@ export interface CallConfig {
   medium?: {
     twilio?: {};
   };
+  botId?: string | null;
 }
 
 export interface DemoConfig {
@@ -157,29 +175,13 @@ export interface NavigateConversation {
 }
 
 export interface TwilioConfig {
+  id: string | undefined;
   auth_token: string;
   account_sid: string;
   from_number: string;
-  to_number: string | undefined;
+  to_number?: string | undefined;
 }
 
-export interface Bot {
-  id: string;
-  name: string;
-  phone_number?: string;
-  voice: string;
-  system_prompt: string;
-  created_at: string;
-  user_id: string;
-  allows_appointments: boolean;
-  availability?: {
-    days: string[];
-    hours: {
-      start: string;
-      end: string;
-    };
-  };
-}
 
 export interface Appointment {
   id: string;

@@ -1,7 +1,4 @@
-'use client';
 
-import { useEffect, useState } from 'react';
-import { Bot } from '@/types/database';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icons';
@@ -17,48 +14,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useBots } from '@/hooks/use-bots';
 
-interface BotListProps {
-  onSelectBot: (botId: string) => void;
-}
 
-export function BotList({ onSelectBot }: BotListProps) {
-  const [bots, setBots] = useState<Bot[]>([]);
-  const [selectedBotId, setSelectedBotId] = useState<string>();
+export function BotList() {
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchBots = async () => {
-      const { data, error } = await supabase
-        .from('bots')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!error && data) {
-        setBots(data);
-      }
-    };
-
-    fetchBots();
-
-    const channel = supabase
-      .channel('bot_changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'bots' },
-        () => {
-          fetchBots();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      channel.unsubscribe();
-    };
-  }, []);
+  const { bots, selectedBotId, setSelectedBotId } = useBots();
 
   const handleBotSelect = (botId: string) => {
     setSelectedBotId(botId);
-    onSelectBot(botId);
   };
 
   const handleDeleteBot = async (botId: string) => {
@@ -76,8 +41,7 @@ export function BotList({ onSelectBot }: BotListProps) {
       });
 
       if (selectedBotId === botId) {
-        setSelectedBotId(undefined);
-        onSelectBot('');
+        setSelectedBotId(null);
       }
     } catch (error) {
       toast({

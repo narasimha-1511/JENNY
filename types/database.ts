@@ -6,6 +6,8 @@ export interface Bot {
   voice: string;
   system_prompt: string;
   user_id: string;
+  is_appointment_booking_allowed: boolean;
+  appointment_tool_id?: string;
 }
 
 export interface Transcript {

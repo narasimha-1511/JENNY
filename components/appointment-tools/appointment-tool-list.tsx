@@ -1,11 +1,6 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { AppointmentTool } from '@/lib/types/appointment';
-import { supabase } from '@/lib/supabase';
-import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icons';
 import { useUser } from '@/hooks/use-user';
+import { useAppointmentTools } from '@/hooks/use-appointments';
 
 interface AppointmentToolListProps {
   onSelectTool: (toolId: string) => void;
@@ -13,40 +8,11 @@ interface AppointmentToolListProps {
 }
 
 export function AppointmentToolList({ onSelectTool, selectedToolId }: AppointmentToolListProps) {
-  const [tools, setTools] = useState<AppointmentTool[]>([]);
+  
   const { user } = useUser();
+  const {  tools } = useAppointmentTools();
 
-  useEffect(() => {
-    const fetchTools = async () => {
-      if (!user?.id) return;
 
-      const { data, error } = await supabase
-        .from('appointment_tools')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (!error && data) {
-        setTools(data);
-      }
-    };
-
-    fetchTools();
-
-    const channel = supabase
-      .channel('appointment_tool_changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'appointment_tools' },
-        () => {
-          fetchTools();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      channel.unsubscribe();
-    };
-  }, [user?.id]);
 
   return (
     <div className="space-y-2">

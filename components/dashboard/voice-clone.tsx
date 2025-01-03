@@ -46,16 +46,9 @@ export function VoiceClone() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showCredentialsDialog, setShowCredentialsDialog] = useState(false);
   const [credentials, setCredentials] = useState<VoiceCloneCredentials | null>(
     null
   );
-  const [newCredentials, setNewCredentials] = useState({
-    api_key: "",
-    model_id: "",
-    voice_id: "",
-    settings: {},
-  });
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -92,73 +85,6 @@ export function VoiceClone() {
       setError("Failed to load voice clone credentials");
     }
   };
-
-  // const saveCredentials = async () => {
-  //   try {
-  //     const { data: { user } } = await supabase.auth.getUser();
-  //     if (!user) throw new Error('No user found');
-
-  //     // First, deactivate any existing active credentials
-  //     const { error: deactivateError } = await supabase
-  //       .from('voice_clone_credentials')
-  //       .update({ is_active: false })
-  //       .eq('user_id', user.id)
-  //       .eq('is_active', true);
-
-  //     if (deactivateError) {
-  //       console.error('Error deactivating old credentials:', deactivateError);
-  //     }
-
-  //     // Insert new credentials
-  //     const { data, error: insertError } = await supabase
-  //       .from('voice_clone_credentials')
-  //       .insert({
-  //         user_id: user.id,
-  //         api_key: newCredentials.api_key,
-  //         model_id: newCredentials.model_id,
-  //         voice_id: newCredentials.voice_id,
-  //         provider: 'elevenlabs', // default provider
-  //         settings: newCredentials.settings,
-  //         is_active: true,
-  //         quota_limit: 0, // Set appropriate default or make it configurable
-  //         quota_used: 0
-  //       })
-  //       .select()
-  //       .single();
-
-  //     if (insertError) throw insertError;
-
-  //     setCredentials(data);
-  //     setShowCredentialsDialog(false);
-  //     setError(null);
-
-  //     // Reset form
-  //     setNewCredentials({
-  //       api_key: '',
-  //       model_id: '',
-  //       voice_id: '',
-  //       settings: {}
-  //     });
-  //   } catch (error) {
-  //     console.error('Error saving credentials:', error);
-  //     setError('Failed to save credentials');
-  //   }
-  // };
-
-  // const updateQuotaUsage = async (credentialId: string, additionalUsage: number) => {
-  //   try {
-  //     const { error } = await supabase
-  //       .from('voice_clone_credentials')
-  //       .update({
-  //         quota_used: credentials ? credentials.quota_used + additionalUsage : additionalUsage
-  //       })
-  //       .eq('id', credentialId);
-
-  //     if (error) throw error;
-  //   } catch (error) {
-  //     console.error('Error updating quota usage:', error);
-  //   }
-  // };
 
   const loadRecordings = async () => {
     try {
@@ -376,9 +302,7 @@ export function VoiceClone() {
             // Try one more time with force flag
             await supabase.storage
               .from("voice-recordings")
-              .remove([recording.recording_path], {
-                force: true,
-              });
+              .remove([recording.recording_path]);
           }
         } catch (storageError) {
           console.error("Storage deletion error:", storageError);
@@ -509,17 +433,6 @@ export function VoiceClone() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Voice Clone</h2>
-        <Button
-          onClick={() => setShowCredentialsDialog(true)}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <Icon name="settings" className="h-4 w-4" />
-          API Settings
-        </Button>
-      </div>
 
       {error && (
         <Alert variant="destructive">

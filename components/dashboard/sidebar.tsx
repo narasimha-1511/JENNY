@@ -6,7 +6,7 @@ import { Icon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
-import { supabase } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase";
 
 // Define the navigation item type
 interface NavItem {

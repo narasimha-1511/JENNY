@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AppointmentTool, BotAppointmentConfig } from '@/lib/types/appointment';
+import { AppointmentTool, BotAppointmentConfig as AppointmentConfig } from '@/lib/types/appointment';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -15,18 +15,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Toggle } from '../ui/toggle';
+import { useBots } from '@/hooks/use-bots';
 
-interface BotAppointmentConfigProps {
-  botId: string;
-}
 
-export function BotAppointmentConfig({ botId }: BotAppointmentConfigProps) {
+export function BotAppointmentConfig() {
   const [loading, setLoading] = useState(false);
   const [tools, setTools] = useState<AppointmentTool[]>([]);
-  const [config, setConfig] = useState<BotAppointmentConfig | null>(null);
+  const [config, setConfig] = useState<AppointmentConfig | null>(null);
   const [isAppointmentEnabled, setIsAppointmentEnabled] = useState(false);
   const { toast } = useToast();
+  const { selectedBotId: botId , updateBot , bots } = useBots();
 
 
   useEffect(() => {
@@ -69,6 +67,8 @@ export function BotAppointmentConfig({ botId }: BotAppointmentConfigProps) {
   const handleToolSelect = async (toolId: string) => {
     try {
       setLoading(true);
+
+      localStorage.setItem('appointment_tool_id', toolId);
 
       //@ts-ignore
       setConfig((prevConfig) => ({ ...prevConfig, tool_id: toolId }));
@@ -146,12 +146,17 @@ export function BotAppointmentConfig({ botId }: BotAppointmentConfigProps) {
   const handleAppointmentToggle = async (value: boolean) => {
     try {
 
+      localStorage.setItem('is_appointment_booking_allowed', value.toString());
+      
       const { error } = await supabase
         .from('bots')
         .update({ is_appointment_booking_allowed: value })
         .eq('id', botId);
 
       if (error) throw error;
+
+      //@ts-ignore
+      updateBot(botId || "", { ...bots.find((bot) => bot.id === botId) ,  is_appointment_booking_allowed: value });
 
       setIsAppointmentEnabled(value); 
 

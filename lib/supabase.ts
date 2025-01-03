@@ -18,18 +18,3 @@ const createBrowserClient = () => createClientComponentClient();
 export const supabase = typeof window === 'undefined' 
   ? createServerClient()
   : createBrowserClient();
-
-// Function to fetch Twilio credentials for a specific user
-export async function fetchTwilioCredentials(userId: string) {
-  const { data, error } = await supabase
-    .from('twilio_credentials')
-    .select('*')
-    .eq('user_id', userId);
-
-  if (error) {
-    console.error('Error fetching Twilio credentials:', error);
-    throw error;
-  }
-
-  return data;
-}

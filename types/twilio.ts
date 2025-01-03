@@ -2,8 +2,8 @@
 
 export interface TwilioCredentials {
     id: number;
-    accountSid: string;
-    authToken: string;
-    fromPhoneNumber: string;
-    createdAt: Date;
+    account_sid: string;
+    auth_token: string;
+    from_phone_number: string;
+    created_at: Date;
 }

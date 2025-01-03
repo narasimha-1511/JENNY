@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Icon } from "@/components/ui/icons";
-import { TranscriptView } from "./transcript-view";
+import { TranscriptView } from "../dashboard/transcript-view";
 import {
   Select,
   SelectContent,
@@ -19,12 +19,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useVoice } from "@/contexts/voice-context";
-import { CallStatus } from "@/components/ui/call-status";
 import { startCall, endCall, startTwilioCall } from "@/lib/callFunctions";
 import { Transcript, UltravoxSessionStatus } from "ultravox-client";
 import { CallConfig, TwilioConfig } from "@/lib/types";
 import { BotAppointmentConfig } from "./bot-appointment-config";
+import { useVoices } from "@/hooks/use-voices";
+import { useBots } from "@/hooks/use-bots";
 
 const formSchema = z.object({
   name: z.string().min(1, "Bot name is required"),
@@ -35,9 +35,6 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-interface BotDetailsProps {
-  botId: string;
-}
 
 interface TwilioNumber {
   id: number;
@@ -46,9 +43,8 @@ interface TwilioNumber {
   from_phone_number: string;
 }
 
-export function BotDetails({ botId }: BotDetailsProps) {
+export function BotDetails() {
   const [loading, setLoading] = useState(false);
-  const [twilioNumbers, setTwilioNumbers] = useState<TwilioNumber[]>([]);
   const [selectedTwilioNumber, setSelectedTwilioNumber] = useState<
     string | null
   >(null);
@@ -71,83 +67,52 @@ export function BotDetails({ botId }: BotDetailsProps) {
     resolver: zodResolver(formSchema),
   });
 
-  const { voices, loading: voicesLoading, error: voicesError } = useVoice();
 
+  const { voices , error: voicesError , isLoading: voicesLoading , twilioInfo: twilioNumbers} = useVoices();
+  const { selectedBotId : botId , bots , updateBot } = useBots();
   const selectedVoice = watch("voice");
 
-  useEffect(() => {
-    console.log("voicesss", voices);
 
-    if (voicesLoading || voicesError) return;
-    // if(!selectedVoice) return;
+  // useEffect(() => {
+  //   if (transcriptContainerRef.current) {
+  //     transcriptContainerRef.current.scrollTop =
+  //       transcriptContainerRef.current.scrollHeight;
+  //   }
+  // }, [callTranscript]);
 
-    console.log("voicesss", voices);
-  }, [voices]);
-
-  useEffect(() => {
-    if (transcriptContainerRef.current) {
-      transcriptContainerRef.current.scrollTop =
-        transcriptContainerRef.current.scrollHeight;
-    }
-  }, [callTranscript]);
+  
 
   useEffect(() => {
-    const fetchBot = async () => {
-      const { data, error } = await supabase
-        .from("bots")
-        .select("*")
-        .eq("id", botId)
-        .single();
+      
+      const bot = bots.find((bot) => bot.id === botId);
 
-      if (error) {
+      if (!bot) {
         toast({
           title: "Error",
-          description: "Failed to fetch bot details",
+          description: "Bot not found",
           variant: "destructive",
         });
         return;
       }
 
-      if (data) {
-        setValue("name", data.name);
-        setValue("phone_number", data.phone_number);
-        setValue("voice", data.voice);
-        setValue("system_prompt", data.system_prompt);
-      }
-    };
+        setValue("name", bot.name);
+        setValue("phone_number", bot.phone_number);
+        setValue("voice", bot.voice);
+        setValue("system_prompt", bot.system_prompt);
 
-    fetchBot();
-  }, [botId, setValue, toast]);
-
-  useEffect(() => {
-    const fetchTwilioNumbers = async () => {
-      setLoadingTwilioNumbers(true);
-      const { data: user } = await supabase.auth.getUser();
-
-      if (!user.user) return;
-
-      const { data, error } = await supabase
-        .from("twilio_credentials")
-        .select("id, from_phone_number , account_sid , auth_token")
-        .eq("user_id", user.user.id);
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to fetch Twilio phone numbers",
-          variant: "destructive",
-        });
-      } else {
-        setTwilioNumbers(data || []);
-      }
-      setLoadingTwilioNumbers(false);
-    };
-
-    fetchTwilioNumbers();
-  }, [toast]);
+  }, [botId , bots]);
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
+    if(!botId || !data){
+      toast({
+        title: "Error",
+        description: "Invalid data",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from("bots")
@@ -163,10 +128,21 @@ export function BotDetails({ botId }: BotDetailsProps) {
         throw error;
       }
 
+      updateBot(botId , {
+        ...bots.find((bot) => bot.id === botId) ,
+        name: data.name,
+        id: botId,
+        //@ts-ignore
+        phone_number: data.phone_number,
+        voice: data.voice,
+        system_prompt: data.system_prompt
+      });
+
       toast({
         title: "Success",
         description: "Bot updated successfully",
       });
+
     } catch (error) {
       console.error("Error updating bot:", error);
     } finally {
@@ -218,7 +194,7 @@ export function BotDetails({ botId }: BotDetailsProps) {
   };
 
   const handleCall = async () => {
-    setIsCallActive(true);
+    // setIsCallActive(true);
 
     const callConfig: CallConfig = {
       systemPrompt: watch("system_prompt"),
@@ -226,6 +202,7 @@ export function BotDetails({ botId }: BotDetailsProps) {
       medium: {
         twilio: {},
       },
+      botId: botId,
     };
 
     const twilioNumber: TwilioNumber | undefined = twilioNumbers.find(
@@ -243,6 +220,7 @@ export function BotDetails({ botId }: BotDetailsProps) {
       from_number: twilioNumber.from_phone_number,
       to_number: watch("phone_number"),
     };
+
 
     try {
       await startTwilioCall(
@@ -387,7 +365,7 @@ export function BotDetails({ botId }: BotDetailsProps) {
 
           
           {/* Appointment Configuratio */}
-          <BotAppointmentConfig botId={botId} />
+          <BotAppointmentConfig />
         
 
         {/* Actions Section */}

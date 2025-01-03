@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { AppointmentToolList } from '@/components/dashboard/appointment-tool-list';
-import { CreateAppointmentTool } from '@/components/dashboard/create-appointment-tool';
-import { AppointmentToolDetails } from '@/components/dashboard/appointment-tool-details';
+import { AppointmentToolList } from '@/components/appointment-tools/appointment-tool-list';
+import { CreateAppointmentTool } from '@/components/appointment-tools/create-appointment-tool';
+import { AppointmentToolDetails } from '@/components/appointment-tools/appointment-tool-details';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icons';
 

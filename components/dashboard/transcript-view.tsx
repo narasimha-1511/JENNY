@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react';
 import { Transcript } from '@/types/database';
 import { supabase } from '@/lib/supabase';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icons';
 import { Transcript as Transscript } from "ultravox-client"
 
 interface TranscriptViewProps {

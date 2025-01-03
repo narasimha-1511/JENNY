@@ -1,19 +1,18 @@
-import { useState, useEffect } from 'react';
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icons';
 import { supabase } from '@/lib/supabase';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { DeleteIcon, Pencil, Trash } from 'lucide-react';
-import { useUser } from '@/hooks/use-user';
+import { Pencil, Trash } from 'lucide-react';
+import { useVoices } from '@/hooks/use-voices';
+import { useVoiceStore } from '@/store/use-voice-store';
+import { useState } from 'react';
 
 export function TwilioIntegration() {
-
-  const { user, loading } = useUser();
-  console.log('User state:', { userId: user?.id, loading });
-
-  const [twilioAccounts, setTwilioAccounts] = useState([
-    { id: '', account_sid: '', auth_token: '', from_phone_number: '' }
-  ]);
+  const { twilioInfo } = useVoices();
+  const setTwilioInfo = useVoiceStore((state) => state.setTwilioInfo);
+  
   const [newAccount, setNewAccount] = useState({
     account_sid: '',
     auth_token: '',
@@ -21,119 +20,72 @@ export function TwilioIntegration() {
   });
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [editMode, setEditMode] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchAccounts = async () => {
-    try {
-      setIsLoading(true);
-      if (!user?.id) {
-        console.log('No user ID available');
-        return;
-      }
-      
-      console.log('Fetching accounts for user:', user.id);
-      const { data, error } = await supabase
-        .from('twilio_credentials')
-        .select('*')
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error('Error fetching accounts:', error);
-        return;
-      }
-
-      console.log('Fetched accounts:', data);
-      setTwilioAccounts(data || []);
-    } catch (error) {
-      console.error('Unexpected error:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    // Only fetch accounts when user is loaded and exists
-    if (!loading && user?.id) {
-      fetchAccounts();
-    }
-  }, [user?.id, loading]); // Add user.id and loading as dependencies
 
   const addTwilioAccount = async () => {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    const userId = user?.id;
-    if (userError) {
-      console.error('Error fetching user:', userError);
-      return;
-    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user?.id || !newAccount.account_sid || !newAccount.auth_token || !newAccount.from_phone_number) {
+        console.error('Missing required fields');
+        return;
+      }
 
-    const newTwilioIntegration = {
-      account_sid: newAccount.account_sid,
-      auth_token: newAccount.auth_token,
-      from_phone_number: newAccount.from_phone_number,
-      user_id: userId
-    };
+      const { data, error } = await supabase
+        .from('twilio_credentials')
+        .insert([{
+          account_sid: newAccount.account_sid,
+          auth_token: newAccount.auth_token,
+          from_phone_number: newAccount.from_phone_number,
+          user_id: user.id
+        }])
+        .select();
 
-    if (newAccount.account_sid && newAccount.auth_token && newAccount.from_phone_number && userId) {
-      const { data, error } = await supabase.from('twilio_credentials').insert([
-        newTwilioIntegration,
-      ]).select();
-
-      console.log('Inserted account:', data[0]);
-
-      if (error) {
-        console.error('Error adding account:', error);
-      } else if(data && data.length > 0){ 
-        setTwilioAccounts([...twilioAccounts, data[0]]);
+      if (error) throw error;
+      
+      if (data) {
+        setTwilioInfo([...twilioInfo, data[0]]);
         setNewAccount({ account_sid: '', auth_token: '', from_phone_number: '' });
         setIsPopoverOpen(false);
-        fetchAccounts(); // Refresh the list
       }
-      
-    } else {
-      console.error('User ID is missing or account details are incomplete.');
+    } catch (error) {
+      console.error('Error adding Twilio account:', error);
     }
   };
 
-  const deleteTwilioAccount = async (id: string) => {
-    const { error } = await supabase.from('twilio_credentials').delete().eq('id', id);
-    if (error) {
-      console.error('Error deleting account:', error);
-    } else {
-      setTwilioAccounts(twilioAccounts.filter((account) => account.id !== id));
+  const deleteTwilioAccount = async (id: number) => {
+    try {
+      const { error } = await supabase
+        .from('twilio_credentials')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      setTwilioInfo(twilioInfo.filter((account) => account.id !== id));
+    } catch (error) {
+      console.error('Error deleting Twilio account:', error);
     }
   };
 
   const updateTwilioAccount = async (updatedAccount: any) => {
-    const { error } = await supabase
-      .from('twilio_credentials')
-      .update(updatedAccount)
-      .eq('id', updatedAccount.id);
-    if (error) {
-      console.error('Error updating account:', error);
-    } else {
-      setTwilioAccounts(
-        twilioAccounts.map((account) => (account.id === updatedAccount.id ? updatedAccount : account))
-      );
-    }
-  };
+    try {
+      const { error } = await supabase
+        .from('twilio_credentials')
+        .update({
+          account_sid: updatedAccount.account_sid,
+          auth_token: updatedAccount.auth_token,
+          from_phone_number: updatedAccount.from_phone_number,
+        })
+        .eq('id', updatedAccount.id);
 
-  const saveUpdatedAccount = async (account: any) => {
-    const { error } = await supabase
-      .from('twilio_credentials')
-      .update({
-        account_sid: account.account_sid,
-        auth_token: account.auth_token,
-        from_phone_number: account.from_phone_number,
-      })
-      .eq('id', account.id);
+      if (error) throw error;
 
-    if (error) {
-      console.error('Error updating account:', error);
-    } else {
-      setTwilioAccounts(
-        twilioAccounts.map((acc) => (acc.id === account.id ? account : acc))
+      setTwilioInfo(
+        twilioInfo.map((acc) => (acc.id === updatedAccount.id ? updatedAccount : acc))
       );
       setEditMode(null);
+    } catch (error) {
+      console.error('Error updating Twilio account:', error);
     }
   };
 
@@ -175,7 +127,7 @@ export function TwilioIntegration() {
         </PopoverContent>
       </Popover>
       <div className="grid grid-cols-1 gap-4">
-        {twilioAccounts.map((account) => (
+        {twilioInfo.map((account) => (
           <div key={account.id} className="p-4 border rounded-md shadow-lg flex justify-between items-center">
             <div className="flex-1">
               {editMode === account.id ? (
@@ -208,7 +160,7 @@ export function TwilioIntegration() {
                     />
                   </div>
                   <Button
-                    onClick={() => saveUpdatedAccount(account)}
+                    onClick={() => updateTwilioAccount(account)}
                     className="mt-2"
                   >
                     Save Changes

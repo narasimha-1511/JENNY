@@ -9,6 +9,11 @@ export function useUser() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if(user) {
+      setLoading(false);
+      return;
+    }
+
     let mounted = true;
 
     async function getInitialUser() {
